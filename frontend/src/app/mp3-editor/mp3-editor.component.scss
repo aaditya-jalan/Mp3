@@ -1,0 +1,181 @@
+@use 'sass:color';
+
+.edit-another-btn {
+  display: inline-block;
+  margin-left: 1.5rem;
+  background: linear-gradient(90deg, #23263a 0%, #764ba2 100%);
+  color: #fff;
+  font-weight: 600;
+  font-size: 1.05rem;
+  padding: 1rem 2.2rem;
+  border-radius: 10px;
+  border: none;
+  outline: none;
+  box-shadow: 0 2px 8px #764ba222;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+  z-index: 2;
+}
+.edit-another-btn:hover {
+  background: linear-gradient(90deg, #764ba2 0%, #a084e8 100%);
+  color: #fff;
+  box-shadow: 0 4px 16px #a084e844;
+  transform: translateY(-2px) scale(1.03);
+}
+
+
+.editor-container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 80% 10%, #667eea33 0%, transparent 70%),
+              radial-gradient(circle at 20% 90%, #764ba233 0%, transparent 70%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1.2rem;
+}
+.file-input-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+input[type="file"] {
+  color: #f3f4f8;
+  background: transparent;
+  border: none;
+  font-size: 1rem;
+  z-index: 1;
+}
+
+label {
+  color: #a084e8;
+  font-size: 1.08rem;
+  margin-bottom: 0.25rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-align: center;
+  display: inline-block;
+  padding: 0.2em 0.8em;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #23263a 0%, #764ba2 100%);
+  box-shadow: 0 2px 8px #764ba222;
+  margin-top: 0.2em;
+  margin-bottom: 0.5em;
+  border-bottom: 2px solid #a084e8;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+  margin-left: auto;
+  margin-right: auto;
+}
+label:hover {
+  background: linear-gradient(90deg, #764ba2 0%, #a084e8 100%);
+  color: #fff;
+  box-shadow: 0 4px 16px #a084e844;
+}
+
+input[type="text"], input[type="file"] {
+  padding: 0.7rem 1rem;
+  border-radius: 8px;
+  border: 1.5px solid #23263a;
+  background: #23263aee;
+  color: #f3f4f8;
+  font-size: 1.04rem;
+  transition: border 0.2s, box-shadow 0.2s, background 0.2s;
+  box-shadow: 0 2px 8px #23263a44, 0 1.5px 6px #764ba222;
+  margin-bottom: 0.18rem;
+  outline: none;
+  border-bottom: 2.5px solid #23263a;
+}
+input[type="text"]:hover, input[type="file"]:hover {
+  border: 1.5px solid #a084e8;
+  background: #23263aff;
+  box-shadow: 0 4px 16px #764ba244, 0 2px 8px #23263a33;
+}
+input[type="text"]:focus, input[type="file"]:focus {
+  border: 1.5px solid #a084e8;
+  outline: none;
+  box-shadow: 0 0 0 3px #a084e855, 0 2px 8px #764ba244;
+  background: #23263aff;
+}
+
+button {
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  border: none;
+  padding: 0.95rem 2.1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1.13rem;
+  font-weight: 700;
+  margin-top: 1.3rem;
+  box-shadow: 0 2px 12px #667eea22;
+  letter-spacing: 0.04em;
+  transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+  z-index: 1;
+}
+button:hover {
+  background: linear-gradient(90deg, #a084e8 0%, #764ba2 100%);
+  box-shadow: 0 6px 24px #764ba244;
+  transform: translateY(-2px) scale(1.03);
+}
+
+.loading {
+  color: #a084e8;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  font-size: 1.08rem;
+  letter-spacing: 0.02em;
+}
+.error {
+  color: #ff6b6b;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  font-size: 1.08rem;
+  letter-spacing: 0.02em;
+}
+
+.download-btn-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 2.5rem;
+}
+.download-btn {
+  display: inline-block;
+  background: linear-gradient(90deg, #a084e8 0%, #764ba2 100%);
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.15rem;
+  padding: 1rem 2.5rem;
+  border-radius: 10px;
+  text-decoration: none;
+  box-shadow: 0 4px 24px #764ba244, 0 2px 8px #23263a33;
+  letter-spacing: 0.04em;
+  border: none;
+  outline: none;
+  transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+  cursor: pointer;
+  z-index: 2;
+}
+.download-btn:hover {
+  background: linear-gradient(90deg, #764ba2 0%, #a084e8 100%);
+  color: #fff;
+  box-shadow: 0 8px 32px #a084e888, 0 2px 8px #764ba244;
+  transform: translateY(-2px) scale(1.04);
+  text-decoration: none;
+}
+
+.tags-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.3rem;
+  z-index: 1;
+  align-items: center;
+}
+// Added missing closing brace to end the stylesheet

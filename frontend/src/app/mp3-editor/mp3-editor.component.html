@@ -1,0 +1,30 @@
+<div class="mp3-editor-container">
+  <ng-container *ngIf="!showDownloadOnly">
+    <input type="file" accept="audio/mp3" (change)="onFileSelected($event)" />
+
+    <div *ngIf="loading" class="loading">Loading...</div>
+    <div *ngIf="error" class="error">{{ error }}</div>
+
+    <form *ngIf="tags" (ngSubmit)="saveTags()" class="tags-form">
+      <div class="filename-edit-row">
+        <label>Song File Name</label>
+        <input [(ngModel)]="newFilename" name="newFilename" placeholder="Enter new file name (with .mp3)" />
+      </div>
+      <div class="cover-art-row">
+        <label>Cover Image (Album Art)</label>
+        <input type="file" accept="image/*" (change)="onCoverArtSelected($event)" />
+        <img *ngIf="coverArtPreview" [src]="coverArtPreview" alt="Cover Preview" style="max-width: 120px; margin-top: 0.5em; border-radius: 8px; box-shadow: 0 2px 8px #23263a44;" />
+      </div>
+      <div *ngFor="let key of (tags | keyvalue)">
+        <label>{{ key.key }}</label>
+        <input [(ngModel)]="editedTags[key.key]" name="{{key.key}}" />
+      </div>
+      <button type="submit">Save Tags</button>
+    </form>
+  </ng-container>
+
+  <div *ngIf="downloadUrl && showDownloadOnly" class="download-btn-row">
+    <a [href]="downloadUrl" download class="download-btn">Download Edited MP3</a>
+    <button type="button" class="edit-another-btn" (click)="resetEditor()">Edit Another MP3</button>
+  </div>
+</div>
