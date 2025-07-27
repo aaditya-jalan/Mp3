@@ -1,30 +1,143 @@
-<div class="mp3-editor-container">
-  <ng-container *ngIf="!showDownloadOnly">
-    <input type="file" accept="audio/mp3" (change)="onFileSelected($event)" />
 
+
+
+<div class="mp3-editor-container">
+  <div class="subtitle" style="text-align:center; margin-bottom: 1.5rem; font-size:1.15rem; color:#CCCCCC;">
+    <ng-container *ngIf="!selectedFile">Upload your MP3 file</ng-container>
+    <ng-container *ngIf="selectedFile && !showDownloadOnly">Edit the metadata </ng-container>
+    <ng-container *ngIf="showDownloadOnly">Download your edited file</ng-container>
+  </div>
+
+
+  <!-- File Upload Section -->
+  <div class="file-upload-section" *ngIf="!selectedFile">
+    <div class="file-input-wrapper">
+      <input type="file" accept="audio/*,.mp3,.flac,.wav,.ogg,.opus,.aac,.m4a,.wma" (change)="onFileSelected($event)" class="file-input" id="file-input" />
+      <label for="file-input" class="file-input-label">
+        <span class="file-text">Select Audio file</span>
+      </label>
+      <div class="drop-zone-text">or drop audio file here</div>
+    </div>
+    
+    <!-- Help Tooltip -->
+    <div class="help-tooltip">
+      <span class="help-icon" (click)="showWorkflowHelp()">?</span>
+      <span class="help-text" (click)="showWorkflowHelp()">How to edit tags</span>
+    </div>
+  </div>
+
+  <!-- Content Section -->
+  <ng-container *ngIf="!showDownloadOnly">
     <div *ngIf="loading" class="loading">Loading...</div>
     <div *ngIf="error" class="error">{{ error }}</div>
 
     <form *ngIf="tags" (ngSubmit)="saveTags()" class="tags-form">
-      <div class="filename-edit-row">
-        <label>Song File Name</label>
-        <input [(ngModel)]="newFilename" name="newFilename" placeholder="Enter new file name (with .mp3)" />
+      <div class="form-grid">
+        <div class="form-col">
+          <label>Song File Name</label>
+          <input pInputText class="styled-input" [(ngModel)]="newFilename" name="newFilename" placeholder="Enter new file name (with .mp3)" />
+        </div>
+        <div class="form-col">
+          <label>Cover Image (Album Art)</label>
+          <input type="file" class="styled-input" accept="image/*" (change)="onCoverArtSelected($event)" />
+          <img *ngIf="coverArtPreview" [src]="coverArtPreview" alt="Cover Preview" style="max-width: 120px; margin-top: 0.5em; border-radius: 8px; box-shadow: 0 2px 8px #23263a44;" />
+        </div>
+        <div class="form-col">
+          <label>Genre</label>
+          <input pInputText class="styled-input" [(ngModel)]="editedTags['genre']" name="genre" placeholder="Genre" />
+        </div>
+        <div class="form-col">
+          <label>Date of Release</label>
+          <input type="date" class="styled-input" [(ngModel)]="editedTags['year']" name="year" placeholder="Date of Release" />
+        </div>
+        <ng-container *ngFor="let key of (tags | keyvalue)">
+          <ng-container *ngIf="key.key !== 'genre' && key.key !== 'year' && key.key !== 'date'">
+            <div class="form-col">
+              <label>
+                {{
+                  key.key === 'albumartist' ? 'Album Artist' :
+                  key.key === 'tracknumber' ? 'Track Number' :
+                  (key.key === 'year' || key.key === 'date' ? 'Date Of Release' : (key.key | titlecase))
+                }}
+              </label>
+              <input pInputText class="styled-input" [(ngModel)]="editedTags[key.key]" name="{{key.key}}" />
+            </div>
+          </ng-container>
+        </ng-container>
       </div>
-      <div class="cover-art-row">
-        <label>Cover Image (Album Art)</label>
-        <input type="file" accept="image/*" (change)="onCoverArtSelected($event)" />
-        <img *ngIf="coverArtPreview" [src]="coverArtPreview" alt="Cover Preview" style="max-width: 120px; margin-top: 0.5em; border-radius: 8px; box-shadow: 0 2px 8px #23263a44;" />
+      <div class="form-actions">
+        <button pButton type="submit" label="Save Tags" class="p-button-primary"></button>
       </div>
-      <div *ngFor="let key of (tags | keyvalue)">
-        <label>{{ key.key }}</label>
-        <input [(ngModel)]="editedTags[key.key]" name="{{key.key}}" />
-      </div>
-      <button type="submit">Save Tags</button>
     </form>
   </ng-container>
 
   <div *ngIf="downloadUrl && showDownloadOnly" class="download-btn-row">
     <a [href]="downloadUrl" download class="download-btn">Download Edited MP3</a>
     <button type="button" class="edit-another-btn" (click)="resetEditor()">Edit Another MP3</button>
+  </div>
+  
+  <!-- Workflow Help Modal -->
+  <div class="workflow-modal" *ngIf="showWorkflowModal" (click)="closeWorkflowHelp()">
+    <div class="workflow-content" (click)="$event.stopPropagation()">
+      <div class="workflow-header">
+        <h2>How to Edit MP3 Files</h2>
+        <button class="close-btn" (click)="closeWorkflowHelp()">×</button>
+      </div>
+      <div class="workflow-body">
+        <div class="workflow-step">
+          <h3>Step 1: Upload Your Audio File</h3>
+          <div class="workflow-image">
+            <div class="placeholder-image">
+              <span class="image-icon">📁</span>
+              <p>Screenshot: Upload audio file</p>
+            </div>
+          </div>
+          <p>Click "Select Audio file" or drag and drop your audio file into the upload area.</p>
+        </div>
+        
+        <div class="workflow-step">
+          <h3>Step 2: Edit Metadata</h3>
+          <div class="workflow-image">
+            <div class="placeholder-image">
+              <span class="image-icon">✏️</span>
+              <p>Screenshot: Edit metadata form</p>
+            </div>
+          </div>
+          <p>Fill in the metadata fields like title, artist, album, genre, and release date. You can also add album artwork.</p>
+        </div>
+        
+        <div class="workflow-step">
+          <h3>Step 3: Save Changes</h3>
+          <div class="workflow-image">
+            <div class="placeholder-image">
+              <span class="image-icon">💾</span>
+              <p>Screenshot: Save tags button</p>
+            </div>
+          </div>
+          <p>Click "Save Tags" to apply your changes to the MP3 file.</p>
+        </div>
+        
+        <div class="workflow-step">
+          <h3>Step 4: Download</h3>
+          <div class="workflow-image">
+            <div class="placeholder-image">
+              <span class="image-icon">⬇️</span>
+              <p>Screenshot: Download buttons</p>
+            </div>
+          </div>
+          <p>Download your edited MP3 file with the updated metadata.</p>
+        </div>
+        
+        <div class="workflow-tips">
+          <h3>💡 Tips</h3>
+          <ul>
+            <li>Supported formats: MP3, FLAC, WAV, OGG, OPUS, AAC, M4A, WMA</li>
+            <li>Image formats for artwork: JPG, PNG, GIF</li>
+            <li>Your original file remains unchanged</li>
+            <li>Audio quality is preserved during editing</li>
+          </ul>
+        </div>
+      </div>
+    </div>
   </div>
 </div>

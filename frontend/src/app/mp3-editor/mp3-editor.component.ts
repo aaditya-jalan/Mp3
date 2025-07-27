@@ -1,17 +1,41 @@
-import { Component } from '@angular/core';
+import { Component, Inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { InputTextModule } from 'primeng/inputtext';
+// import { DropdownModule } from 'primeng/dropdown/primeng-dropdown';
+import { ButtonModule } from 'primeng/button';
 import { Mp3EditorService } from './mp3-editor.service';
 
 @Component({
   selector: 'app-mp3-editor',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, InputTextModule, ButtonModule],
   templateUrl: './mp3-editor.component.html',
   styleUrls: ['./mp3-editor.component.scss'],
   providers: [Mp3EditorService]
 })
 export class Mp3EditorComponent {
+  theme: 'light' | 'dark' = 'dark';
+
+  constructor(
+    private mp3Service: Mp3EditorService,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {
+    if (isPlatformBrowser(this.platformId)) {
+      const saved = localStorage.getItem('theme') as 'light' | 'dark';
+      this.theme = saved ?? 'dark';
+      document.documentElement.setAttribute('data-theme', this.theme);
+    }
+  }
+
+  switchTheme() {
+    this.theme = this.theme === 'dark' ? 'light' : 'dark';
+    if (isPlatformBrowser(this.platformId)) {
+      document.documentElement.setAttribute('data-theme', this.theme);
+      localStorage.setItem('theme', this.theme);
+    }
+  }
   selectedFile: File | null = null;
   tags: Record<string, any> | null = null;
   editedTags: Record<string, any> = {};
@@ -20,6 +44,7 @@ export class Mp3EditorComponent {
   error: string | null = null;
   newFilename: string | null = null;
   showDownloadOnly: boolean = false;
+  showWorkflowModal: boolean = false;
   coverArt: File | null = null;
   coverArtPreview: string | null = null;
   onCoverArtSelected(event: any) {
@@ -37,7 +62,6 @@ export class Mp3EditorComponent {
     }
   }
 
-  constructor(private mp3Service: Mp3EditorService) {}
 
   onFileSelected(event: any) {
     const file = event.target.files[0];
@@ -54,8 +78,40 @@ export class Mp3EditorComponent {
     this.mp3Service.uploadAndGetTags(this.selectedFile).subscribe({
       next: (data: any) => {
         // Backend returns { filename, metadata }
+        console.log('File data from backend:', data);
         this.tags = data.metadata || {};
-        this.editedTags = { ...this.tags };
+        // Ensure year is in yyyy-MM-dd format for input[type=date]
+        const tagsCopy = { ...this.tags };
+        // Prefer 'year', but if not present, use 'date' for the date input
+        let dateValue = tagsCopy['year'] || tagsCopy['date'];
+        if (dateValue) {
+          let dateStr = dateValue;
+          // If array, use first value
+          if (Array.isArray(dateStr)) {
+            dateStr = dateStr[0];
+          }
+          // If only year (e.g. '2022'), add -01-01
+          if (/^\d{4}$/.test(dateStr)) {
+            dateStr = `${dateStr}-01-01`;
+          }
+          // If only year-month (e.g. '2022-05'), add -01
+          else if (/^\d{4}-\d{2}$/.test(dateStr)) {
+            dateStr = `${dateStr}-01`;
+          }
+          // If not yyyy-MM-dd, try to parse as Date
+          else if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+            const d = new Date(dateStr);
+            if (!isNaN(d.getTime())) {
+              // Format as yyyy-MM-dd
+              const yyyy = d.getFullYear();
+              const mm = String(d.getMonth() + 1).padStart(2, '0');
+              const dd = String(d.getDate()).padStart(2, '0');
+              dateStr = `${yyyy}-${mm}-${dd}`;
+            }
+          }
+          tagsCopy['year'] = dateStr;
+        }
+        this.editedTags = tagsCopy;
         this.newFilename = data.filename || this.selectedFile?.name || '';
         this.loading = false;
       },
@@ -71,7 +127,19 @@ export class Mp3EditorComponent {
     this.loading = true;
     this.error = null;
     const filenameToSend = this.newFilename && this.newFilename.trim() !== '' ? this.newFilename.trim() : this.selectedFile.name;
-    this.mp3Service.editTags(filenameToSend, this.editedTags, this.coverArt || undefined).subscribe({
+    // Map 'year' to 'date' for backend compatibility
+    const tagsToSend = { ...this.editedTags };
+    if (tagsToSend['year']) {
+      tagsToSend['date'] = tagsToSend['year'];
+      delete tagsToSend['year'];
+    }
+    // Log the payload being sent to the backend
+    console.log('Payload to backend:', {
+      filename: filenameToSend,
+      tags: tagsToSend,
+      coverArt: this.coverArt
+    });
+    this.mp3Service.editTags(filenameToSend, tagsToSend, this.coverArt || undefined).subscribe({
       next: (res: any) => {
         // Debug: Log backend response and download_url
         console.log('Backend response:', res);
@@ -97,5 +165,13 @@ export class Mp3EditorComponent {
     this.error = null;
     this.newFilename = null;
     this.showDownloadOnly = false;
+  }
+
+  showWorkflowHelp() {
+    this.showWorkflowModal = true;
+  }
+
+  closeWorkflowHelp() {
+    this.showWorkflowModal = false;
   }
 }
